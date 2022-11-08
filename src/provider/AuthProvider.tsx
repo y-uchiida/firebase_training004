@@ -2,11 +2,12 @@ import { User } from "firebase/auth";
 import React, { FC, useEffect, useState } from "react";
 import { auth } from "../service/firebase";
 
+export type CurrentUser = User | null;
+export type AuthContext = {
+	currentUser: CurrentUser;
+}
 
-export const AuthContext = React.createContext({} as {
-	currentUser: User | null,
-	// setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>
-});
+export const AuthContext = React.createContext({} as AuthContext);
 
 // childrenの型定義をしておかないとエラーになる
 interface props {
