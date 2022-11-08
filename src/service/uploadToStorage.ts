@@ -22,10 +22,16 @@ const saveVideoMetadata = async (
 	const downloadURL = await getDownloadURL(snapshot.ref);
 	let metadataForFirestore = _.omitBy(snapshot.metadata, _.isEmpty);
 	metadataForFirestore = Object.assign(metadataForFirestore, { downloadURL });
-	const userVideoDocumentRef = collection(db, `users/${userUid}/videos`);
-	await addDoc(userVideoDocumentRef, metadataForFirestore).catch((error) => {
+	const userVideoCollectionRef = collection(db, `users/${userUid}/videos`);
+	const userVideoDocumentRef = await addDoc(userVideoCollectionRef, metadataForFirestore).catch((error) => {
 		console.error(error);
 	});
+
+	if (!userVideoDocumentRef) {
+		return null;
+	}
+	const VideoCollectionRef = collection(db, 'videos');
+	await addDoc(VideoCollectionRef, { video: userVideoDocumentRef });
 }
 
 const uploadToStorage = (
