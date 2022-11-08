@@ -1,4 +1,4 @@
-import { Card, CardContent, SxProps, Theme, Typography } from '@mui/material'
+import { Box, Card, CardContent, CircularProgress, SxProps, Theme, Typography } from '@mui/material'
 import { TaskState } from 'firebase/storage'
 import React, { FC, memo } from 'react'
 
@@ -22,7 +22,14 @@ const UploadVideoCard: FC<Props> = ({ fileName, blobUrl, state, progress, sx }: 
 				<Typography variant='subtitle1'>{fileName}</Typography>
 				<span>
 					{state === 'success' && <>complete</>}
-					{state === 'running' && <>{progress.toFixed(1)} % uploaded...</>}
+					{state === 'running' &&
+						<>
+							<Box sx={{ display: 'flex', columnGap: 1, alignItems: 'center' }}>
+								<CircularProgress size={16} />
+								{progress.toFixed(1)} % uploaded...
+							</Box>
+						</>
+					}
 				</span>
 			</CardContent>
 		</Card>
