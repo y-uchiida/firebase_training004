@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { FC, useCallback, useContext, useEffect, useState } from 'react'
 import { Box, Card, CardContent, Typography } from '@mui/material'
 import DropZone from '../organisms/DropZone';
 import { AuthContext } from '../../provider/AuthProvider';
@@ -6,6 +6,7 @@ import type { FileRejection, DropEvent } from 'react-dropzone';
 import { ref, StorageError, uploadBytesResumable, UploadTask, UploadTaskSnapshot } from 'firebase/storage';
 import { storage } from '../../service/firebase';
 import UploadVideoCard from '../organisms/UploadVideoCard';
+import uploadToStorage from '../../service/uploadToStorage';
 
 interface uploadFile {
 	file: File,
@@ -18,9 +19,17 @@ const handleUpload = (
 	authContext: AuthContext,
 	setUploadFiles: React.Dispatch<React.SetStateAction<uploadFile[]>>
 ) => {
-	const storageRef = ref(storage, `videos/${authContext.currentUser?.uid}/${file.name}`);
+	const refString = `videos/${authContext.currentUser?.uid}/${file.name}`;
 	const blobUrl = URL.createObjectURL(file);
-	const uploadTask = uploadBytesResumable(storageRef, file);
+	const uploadTask = uploadToStorage(authContext, refString, file);
+
+	/* uploadToStorage のエラー処理が完成していなく、null が返ってくる場合がある
+	 * エラー処理をちゃんと書ければここの分岐は不要になると思う
+	 */
+	if (uploadTask === null) {
+		return null;
+	}
+
 	setUploadFiles((current) => [...current, { file, blobUrl, uploadTask }]);
 	uploadTask.on('state_changed',
 		/* 1. progress */
@@ -80,12 +89,11 @@ const handleUploadComplete = (
 	return null;
 }
 
-const UploadVideo = () => {
+const UploadVideo: FC = () => {
 	const [uploadFiles, setUploadFiles] = useState<uploadFile[]>([]);
 	const authContext = useContext(AuthContext);
 
 	const onDropAccepted = useCallback((acceptedFiles: File[]) => {
-		console.log(acceptedFiles);
 		acceptedFiles.map((file) => { handleUpload(file, authContext, setUploadFiles) });
 	}, []);
 
@@ -100,7 +108,8 @@ const UploadVideo = () => {
 			<Box sx={{ mt: 1 }}>
 				<DropZone dropzoneOptions={{
 					accept: {
-						'video/*': ['.mpg', '.mpeg', '.mp4', '.webm', '.ogv', '.mov', '.qt', '.avi']
+						// 'video/*': ['.mpg', '.mpeg', '.mp4', '.webm', '.ogv', '.mov', '.qt', '.avi']
+						'video/mp4': ['.mp4']
 					},
 					onDropAccepted,
 					onDropRejected,

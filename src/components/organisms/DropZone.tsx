@@ -10,7 +10,7 @@ interface props {
 
 const DropZone: FC<props> = ({ dropzoneOptions }: props) => {
 
-	const { getRootProps, getInputProps, isDragActive, open, acceptedFiles } = useDropzone({
+	const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
 		...dropzoneOptions
 	});
 
