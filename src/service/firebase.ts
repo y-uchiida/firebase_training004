@@ -1,7 +1,9 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { connectStorageEmulator, getStorage } from 'firebase/storage';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions'
+import { connectAuthEmulator, getAuth, GoogleAuthProvider } from "firebase/auth";
+import config from '../../firebase.json';
 
 /* .env で設定したfirebase の設定を読み込む */
 const firebaseConfig = {
@@ -18,9 +20,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 /* 初期化後、機能別にモジュール化されたオブジェクトをエクスポートする*/
-export const db = getFirestore();
-export const storage = getStorage();
-export const auth = getAuth();
-export const googleAuthProvider = new GoogleAuthProvider();
+const db = getFirestore();
+const storage = getStorage();
+const functions = getFunctions();
+const auth = getAuth();
+const googleAuthProvider = new GoogleAuthProvider();
+
+/* localhost で動作している場合は、接続先をエミュレータに切り替える */
+const isEmulating = window.location.hostname === 'localhost'
+if (isEmulating) {
+	const emulators = config.emulators;
+	connectFirestoreEmulator(db, 'localhost', emulators.firestore.port);
+	connectStorageEmulator(storage, 'localhost', emulators.storage.port);
+	connectFunctionsEmulator(functions, 'localhost', emulators.functions.port);
+	connectAuthEmulator(auth, `http://localhost:9099/${emulators.auth.port}`);
+}
 
 export default app;
+export { db, storage, auth, googleAuthProvider }

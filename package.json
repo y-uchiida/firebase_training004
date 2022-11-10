@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:watch": "vite build --watch",
+    "emulator:serve": "firebase emulators:start",
     "preview": "vite preview"
   },
   "dependencies": {
