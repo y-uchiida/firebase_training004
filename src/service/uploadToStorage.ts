@@ -32,37 +32,43 @@ const saveVideoMetadata = async (
 	}
 	const VideoCollectionRef = collection(db, 'videos');
 	await addDoc(VideoCollectionRef, { video: userVideoDocumentRef });
+
 }
 
-const uploadToStorage = (
+const uploadToStorage = async (
 	authContext: AuthContext,
 	refString: string,
 	file: File
 ) => {
+
 	const currentUser = authContext?.currentUser;
 
 	if (currentUser === null) {
 		/* TODO: ユーザーが取得できない場合のエラー処理 */
-		return null;
+		throw new Error('currentUser null');
 	}
 
+	const idToken = await currentUser?.getIdToken();
+	if (idToken === undefined) {
+		/* TODO: idTokenが取得できない場合のエラー処理 */
+		throw new Error('idToken undefined');
+	}
+	const metadataForStorage = {
+		customMetadata: {
+			idToken
+		}
+	};
+
 	const storageRef = ref(storage, refString);
-	const uploadTask = uploadBytesResumable(storageRef, file);
+	const uploadTask = uploadBytesResumable(storageRef, file, metadataForStorage);
 
 	uploadTask.then(async (snapshot) => {
-		const idToken = await currentUser?.getIdToken();
-		if (idToken === undefined) {
-			/* TODO: idTokenが取得できない場合のエラー処理 */
-			return null;
-		}
-		const metadataForStorage = {
-			customMetadata: {
-				idToken
-			}
-		};
 		await updateMetadata(storageRef, metadataForStorage);
 		await saveVideoMetadata(currentUser, snapshot);
-	});
+	},
+		(error) => {
+			console.error(error);
+		});
 	return uploadTask;
 }
 

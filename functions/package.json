@@ -15,11 +15,18 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@types/uuid": "^8.3.4",
+    "ffmpeg-static": "^5.1.0",
     "firebase": "^9.13.0",
     "firebase-admin": "^10.0.2",
-    "firebase-functions": "^4.0.2"
+    "firebase-functions": "^4.0.2",
+    "fluent-ffmpeg": "^2.1.2",
+    "typesync": "^0.9.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/eslint": "^8.4.10",
+    "@types/fluent-ffmpeg": "^2.1.20",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
     "eslint": "^8.9.0",

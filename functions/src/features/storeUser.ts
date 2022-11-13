@@ -1,12 +1,12 @@
-import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { auth, } from 'firebase-functions/v1';
 
-initializeApp();
-const db = getFirestore();
 
 /* ユーザーの新規登録をトリガーに実行される関数を作成 */
 export const storeUser = auth.user().onCreate(async (newUser) => {
+
+	const db = getFirestore();
+
 	try {
 		const { providerData } = newUser;
 		const providerId = providerData.length === 0 ? 'password' : providerData[0].providerId;
