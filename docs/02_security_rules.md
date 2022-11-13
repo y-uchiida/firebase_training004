@@ -1,3 +1,13 @@
+# firebase security rules
+
+firestore や storage など、firebase のサービスごとにセキュリティルールを設定できる
+セキュリティルールにより、リクエストを受容するか、拒否するかを判定できるようになる
+
+## セキュリティルールの記述例
+
+JavaScript に類似した専用言語で記述する
+
+```js
 rules_version = '2';
 service cloud.firestore {
 	// Firestore のルートパス指定、これは必ず必要
@@ -50,3 +60,23 @@ service cloud.firestore {
     }
   }
 }
+```
+
+## セキュリティルールのデプロイ
+
+firebase cli から、`firebase deploy`でデプロイする  
+`rules` オプションで、セキュリティルールのみデプロイできる
+
+例: firestore のセキュリティルールのみデプロイする場合
+
+```
+$ firebase deploy --only firestroe:rules
+```
+
+## 参考
+
+- CloudFirestore セキュリティルールの記述条件:
+  https://firebase.google.com/docs/firestore/security/rules-conditions?hl=ja
+
+- Firestore Security Rules の書き方と守るべき原則:
+  https://qiita.com/KosukeSaigusa/items/18217958c581eac9b245
