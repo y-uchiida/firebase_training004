@@ -15,7 +15,7 @@ service cloud.firestore {
     // ユーザー認証ずみのリクエストを判定する
     // 匿名認証を許容する
     function isAuthenticated() {
-      return auth().uid !== null;
+      return auth().uid != null;
     }
 
     // ユーザーIDを受け取り、リクエストに含まれるユーザーと一致するかを判定する
