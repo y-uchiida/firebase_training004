@@ -1,10 +1,9 @@
-import React, { FC, useCallback, useContext, useEffect, useState } from 'react'
-import { Box, Card, CardContent, Typography } from '@mui/material'
+import React, { FC, useCallback, useContext, useState } from 'react'
+import { Box, Typography } from '@mui/material'
 import DropZone from '../organisms/DropZone';
 import { AuthContext } from '../../provider/AuthProvider';
 import type { FileRejection, DropEvent } from 'react-dropzone';
-import { ref, StorageError, uploadBytesResumable, UploadTask, UploadTaskSnapshot } from 'firebase/storage';
-import { storage } from '../../service/firebase';
+import { StorageError, UploadTask, UploadTaskSnapshot } from 'firebase/storage';
 import UploadVideoCard from '../organisms/UploadVideoCard';
 import uploadToStorage from '../../service/uploadToStorage';
 
@@ -14,21 +13,15 @@ interface uploadFile {
 	uploadTask: UploadTask,
 }
 
-const handleUpload = (
+const handleUpload = async (
 	file: File,
 	authContext: AuthContext,
 	setUploadFiles: React.Dispatch<React.SetStateAction<uploadFile[]>>
 ) => {
 	const refString = `videos/${authContext.currentUser?.uid}/${file.name}`;
 	const blobUrl = URL.createObjectURL(file);
-	const uploadTask = uploadToStorage(authContext, refString, file);
-
-	/* uploadToStorage のエラー処理が完成していなく、null が返ってくる場合がある
-	 * エラー処理をちゃんと書ければここの分岐は不要になると思う
-	 */
-	if (uploadTask === null) {
-		return null;
-	}
+	const uploadTaskSnapshot = await uploadToStorage(authContext, refString, file);
+	const uploadTask = uploadTaskSnapshot.task;
 
 	setUploadFiles((current) => [...current, { file, blobUrl, uploadTask }]);
 	uploadTask.on('state_changed',
@@ -36,7 +29,7 @@ const handleUpload = (
 		(snapshot) => handleUploadProgress(snapshot, setUploadFiles),
 		/* 2. error */
 		(error) => handleUploadError(error, setUploadFiles),
-		/* 3.  */
+		/* 3. complete */
 		() => handleUploadComplete(uploadTask, setUploadFiles),
 	);
 }
@@ -108,8 +101,8 @@ const UploadVideo: FC = () => {
 			<Box sx={{ mt: 1 }}>
 				<DropZone dropzoneOptions={{
 					accept: {
-						// 'video/*': ['.mpg', '.mpeg', '.mp4', '.webm', '.ogv', '.mov', '.qt', '.avi']
-						'video/mp4': ['.mp4']
+						'video/*': ['.mpg', '.mpeg', '.mp4', '.webm', '.ogv', '.mov', '.qt', '.avi']
+						// 'video/mp4': ['.mp4']
 					},
 					onDropAccepted,
 					onDropRejected,
